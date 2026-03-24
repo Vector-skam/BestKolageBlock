@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    
+    <!-- SEO для Google -->
+    <meta name="description" content="Бесплатный онлайн-коллаж фото с рандомным размещением. Загружай фото, перетаскивай пальцем, меняй размер. Идеально работает на телефоне и компьютере.">
+    <meta name="keywords" content="коллаж фото онлайн, создать коллаж, фотоколлаж, рандом коллаж, коллаж на телефоне, онлайн редактор коллажей, сделать коллаж бесплатно, collage maker">
+    <meta name="author" content="Коллаж Фото">
+    <meta name="robots" content="index, follow">
+
+    <meta name="google-site-verification" content="3grPkXZvX_CWEF3eI1WhKGb_M-H1n-HQwh4v9A619u8" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Коллаж Фото — Онлайн редактор коллажей">
+    <meta property="og:description" content="Создавай красивые случайные коллажи из своих фотографий. Перетаскивание, изменение размера, человеческий рандом. Работает на любом устройстве.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bestkolageblock.netlify.app/">
+    <meta property="og:image" content="http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='82' font-size='85'%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Коллаж Фото 🖼️ — Создавай крутые коллажи онлайн">
+    <meta name="twitter:description" content="Рандомный коллаж с удобным управлением на сенсоре и ПК.">
+    
+    <!-- Иконка вкладки — твой смайлик 🖼️ -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='82' font-size='85'%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='82' font-size='85'%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E">
+
+    <title>Коллаж Фото 🖼️</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            touch-action: none;
+        }
+
+        h1 {
+            font-size: 2.7rem;
+            background: linear-gradient(90deg, #ff00cc, #00ffcc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle { opacity: 0.8; margin-bottom: 20px; font-size: 1.05rem; }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        button#uploadBtn { background: #ff00cc; color: white; }
+        button#randomBtn { background: #00ffcc; color: #000; }
+        button#downloadBtn { background: #444; color: white; }
+
+        button:hover { transform: scale(1.08); }
+
+        #collage {
+            position: relative;
+            width: 100%;
+            max-width: 1180px;
+            height: 640px;
+            background: #0f0f0f;
+            border: 12px solid #1a1a1a;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.8);
+            touch-action: none;
+        }
+
+        #collage img {
+            position: absolute;
+            border: 8px solid #ffffff;
+            border-radius: 16px;
+            box-shadow: 10px 15px 35px rgba(0,0,0,0.6);
+            user-select: none;
+            touch-action: none;
+        }
+
+        .resize-handle {
+            position: absolute;
+            right: -8px; bottom: -8px;
+            width: 36px; height: 36px;
+            background: #00ffcc;
+            border: 5px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        #collage img:hover .resize-handle,
+        #collage img:active .resize-handle { opacity: 1; }
+
+        .empty-state {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center; color: #666; z-index: 5;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.95rem;
+        }
+        footer a { color: #00ffcc; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Модальное окно политики */
+        #privacyModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.97);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #111;
+            max-width: 820px;
+            margin: 20px;
+            padding: 35px;
+            border-radius: 20px;
+            color: #ddd;
+            line-height: 1.65;
+        }
+        .modal-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Коллаж Фото 🖼️</h1>
+    <p class="subtitle">Перетаскивай • Меняй размер • Создавай красиво</p>
+
+    <div class="controls">
+        <button id="uploadBtn">📸 Загрузить фото</button>
+        <button id="randomBtn">🎲 Рандом</button>
+        <button id="downloadBtn">⬇️ Скачать PNG</button>
+    </div>
+
+    <div id="collage">
+        <div class="empty-state">
+            <h3>Пока пусто...</h3>
+            <p>Загрузи фото и начинай творить</p>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+
+    <footer>
+        <a href="#" onclick="showPrivacy(); return false;">Политика конфиденциальности</a>
+    </footer>
+
+    <!-- Модальное окно политики (показывается при первом заходе) -->
+    <div id="privacyModal">
+        <div class="modal-content">
+            <h2 style="color:#00ffcc; margin-bottom:20px;">Политика конфиденциальности</h2>
+            <p><strong>Дата: 24 марта 2026</strong></p>
+            
+            <p>Данное приложение работает <strong>полностью в вашем браузере</strong>. Никакие фотографии и данные не отправляются на сервер.</p>
+            
+            <h3>Мы не собираем данные</h3>
+            <p>Фото остаются только на вашем устройстве. Мы не используем cookies для отслеживания и не подключаем аналитику.</p>
+            
+            <p>Продолжая использовать приложение, вы соглашаетесь с этой политикой.</p>
+
+            <div class="modal-buttons">
+                <button onclick="acceptPrivacy()" style="background:#00ffcc; color:#000; padding:14px 32px; border:none; border-radius:50px; font-weight:600; cursor:pointer;">
+                    Я согласен
+                </button>
+                <button onclick="declinePrivacy()" style="background:#555; color:white; padding:14px 32px; border:none; border-radius:50px; font-weight:600; cursor:pointer;">
+                    Не согласен (закрыть вкладку)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === Основные переменные ===
+        const collage = document.getElementById('collage');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        let photos = [];
+
+        // Проверка первого посещения
+        if (!localStorage.getItem('privacyAccepted')) {
+            document.getElementById('privacyModal').style.display = 'flex';
+        }
+
+        function acceptPrivacy() {
+            localStorage.setItem('privacyAccepted', 'true');
+            document.getElementById('privacyModal').style.display = 'none';
+        }
+
+        function declinePrivacy() {
+            window.close(); // Закрываем вкладку
+            // Если не сработает (некоторые браузеры блокируют), показываем сообщение
+            document.body.innerHTML = `<h2 style="color:#ff00cc; text-align:center; margin-top:100px;">Вы отказались от использования приложения.<br>Вкладка будет закрыта.</h2>`;
+        }
+
+        function showPrivacy() {
+            document.getElementById('privacyModal').style.display = 'flex';
+        }
+
+        // === Человеческий рандом ===
+        function placePhotoHumanLike(img) {
+            const cw = collage.clientWidth;
+            const ch = collage.clientHeight;
+            let width = 160 + Math.random() * 260;
+            if (Math.random() < 0.23) width += 100;
+            img.style.width = width + 'px';
+
+            const tryPlace = () => {
+                const w = img.offsetWidth, h = img.offsetHeight;
+                let bestX = 0, bestY = 0, bestScore = -9999;
+                for (let i = 0; i < 70; i++) {
+                    let x = (cw - w) * (0.08 + Math.random() * 0.84);
+                    let y = (ch - h) * (0.08 + Math.random() * 0.84);
+                    if (w > 360) {
+                        x = x * 0.4 + (cw - w) * 0.5 * 0.6;
+                        y = y * 0.4 + (ch - h) * 0.5 * 0.6;
+                    }
+                    img.style.left = x + 'px';
+                    img.style.top = y + 'px';
+
+                    let score = 140;
+                    for (let p of photos) {
+                        if (p === img) continue;
+                        const overlap = getOverlapPercent(img, p);
+                        if (overlap > 10) score -= (overlap - 10) * 13;
+                    }
+                    let closeness = 0;
+                    for (let p of photos) {
+                        if (p === img) continue;
+                        const dx = (x + w/2) - (parseFloat(p.style.left || 0) + p.offsetWidth/2);
+                        const dy = (y + h/2) - (parseFloat(p.style.top || 0) + p.offsetHeight/2);
+                        closeness += Math.max(0, 220 - Math.hypot(dx, dy));
+                    }
+                    score -= closeness * 0.15;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestX = x;
+                        bestY = y;
+                    }
+                }
+                img.style.left = bestX + 'px';
+                img.style.top = bestY + 'px';
+                img.style.transform = `rotate(${Math.random() * 26 - 13}deg)`;
+                img.style.opacity = '0';
+                setTimeout(() => {
+                    img.style.transition = 'all 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+                    img.style.opacity = '1';
+                }, 20);
+                photos.push(img);
+            };
+            if (img.complete) tryPlace();
+            else img.onload = tryPlace;
+        }
+
+        function getOverlapPercent(a, b) {
+            const r1 = a.getBoundingClientRect();
+            const r2 = b.getBoundingClientRect();
+            const c = collage.getBoundingClientRect();
+            const left = Math.max(r1.left - c.left, r2.left - c.left);
+            const right = Math.min(r1.right - c.left, r2.right - c.left);
+            const top = Math.max(r1.top - c.top, r2.top - c.top);
+            const bottom = Math.min(r1.bottom - c.top, r2.bottom - c.top);
+            const overlapArea = Math.max(0, right - left) * Math.max(0, bottom - top);
+            return (overlapArea / (r1.width * r1.height)) * 100 || 0;
+        }
+
+        // Перетаскивание + ресайз + двойной тап
+        function makeInteractive(img) {
+            let dragging = false, resizing = false;
+            let startX, startY, origLeft, origTop, origWidth;
+
+            const handle = document.createElement('div');
+            handle.className = 'resize-handle';
+            handle.innerHTML = '↘';
+            img.appendChild(handle);
+
+            function startMove(e) {
+                const cx = e.touches ? e.touches[0].clientX : e.clientX;
+                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                if (e.target === handle) {
+                    resizing = true;
+                    startX = cx;
+                    origWidth = img.offsetWidth;
+                    img.style.transition = 'none';
+                    e.preventDefault();
+                    return;
+                }
+                dragging = true;
+                startX = cx; startY = cy;
+                origLeft = parseFloat(img.style.left) || 0;
+                origTop = parseFloat(img.style.top) || 0;
+                img.style.zIndex = 9999;
+                img.style.transition = 'none';
+                e.preventDefault();
+            }
+
+            function move(e) {
+                const cx = e.touches ? e.touches[0].clientX : e.clientX;
+                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                if (dragging) {
+                    img.style.left = (origLeft + cx - startX) + 'px';
+                    img.style.top = (origTop + cy - startY) + 'px';
+                }
+                if (resizing) {
+                    let newW = origWidth + (cx - startX);
+                    if (newW < 90) newW = 90;
+                    img.style.width = newW + 'px';
+                }
+            }
+
+            function endMove() {
+                dragging = false;
+                resizing = false;
+                img.style.transition = 'all 0.3s cubic-bezier(0.25,0.1,0.25,1)';
+            }
+
+            img.addEventListener('mousedown', startMove);
+            document.addEventListener('mousemove', move);
+            document.addEventListener('mouseup', endMove);
+
+            img.addEventListener('touchstart', startMove, { passive: false });
+            document.addEventListener('touchmove', move, { passive: false });
+            document.addEventListener('touchend', endMove);
+
+            // Двойной тап / клик для удаления
+            let lastTap = 0;
+            img.addEventListener('touchend', e => {
+                const now = Date.now();
+                if (now - lastTap < 500 && e.target !== handle) {
+                    img.style.opacity = '0';
+                    img.style.transform = 'scale(0.7) rotate(20deg)';
+                    setTimeout(() => { img.remove(); photos = photos.filter(p => p !== img); }, 300);
+                }
+                lastTap = now;
+            });
+            img.addEventListener('dblclick', () => {
+                img.style.opacity = '0';
+                img.style.transform = 'scale(0.7) rotate(20deg)';
+                setTimeout(() => { img.remove(); photos = photos.filter(p => p !== img); }, 300);
+            });
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.position = 'absolute';
+                    collage.appendChild(img);
+                    collage.querySelector('.empty-state').style.display = 'none';
+                    placePhotoHumanLike(img);
+                    makeInteractive(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Скачивание коллажа как PNG
+        function downloadPNG() {
+            if (photos.length === 0) {
+                alert("Сначала добавьте хотя бы одно фото!");
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = collage.clientWidth;
+            canvas.height = collage.clientHeight;
+
+            // Фон
+            ctx.fillStyle = '#0f0f0f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const images = collage.querySelectorAll('img');
+            images.forEach(img => {
+                const rect = img.getBoundingClientRect();
+                const cRect = collage.getBoundingClientRect();
+                const x = rect.left - cRect.left;
+                const y = rect.top - cRect.top;
+
+                ctx.save();
+                ctx.translate(x + img.offsetWidth/2, y + img.offsetHeight/2);
+                ctx.rotate((parseFloat(img.style.transform ? img.style.transform.match(/rotate\((.+?)\)/)[1] : '0') * Math.PI) / 180);
+                ctx.drawImage(img, -img.offsetWidth/2, -img.offsetHeight/2, img.offsetWidth, img.offsetHeight);
+                ctx.restore();
+            });
+
+            const link = document.createElement('a');
+            link.download = 'my-collage.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Кнопки
+        uploadBtn.onclick = () => fileInput.click();
+        randomBtn.onclick = () => {
+            const all = [...photos];
+            all.forEach((img, i) => {
+                img.style.transition = 'all 0.75s cubic-bezier(0.68,-0.55,0.27,1.55)';
+                img.style.transform = `scale(0.72) rotate(${Math.random()*36 - 18}deg)`;
+                setTimeout(() => placePhotoHumanLike(img), i * 70);
+            });
+        };
+        downloadBtn.onclick = downloadPNG;
+
+        fileInput.onchange = e => {
+            if (e.target.files.length) handleFiles(e.target.files);
+            e.target.value = '';
+        };
+
+        document.addEventListener('keydown', e => {
+            if (e.key.toLowerCase() === 'r') randomBtn.click();
+        });
+    </script>
+</body>
+</html>
