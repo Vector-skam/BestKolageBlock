@@ -129,3 +129,95 @@
 
 </body>
 </html>
+<script>
+    function initWeb3LegalAlert() {
+    if (localStorage.getItem('web3_agreed_full')) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+        #web3-legal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9);
+            z-index: 99999; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px); font-family: 'Inter', system-ui, sans-serif;
+        }
+        .web3-modal {
+            background: #0d1117; color: #e6edf3; width: 90%; max-width: 600px;
+            border-radius: 20px; border: 1px solid #30363d; padding: 32px;
+            box-shadow: 0 0 40px rgba(0, 255, 163, 0.15);
+        }
+        .web3-modal h2 { margin: 0 0 15px 0; color: #58a6ff; font-size: 24px; text-align: center; }
+        .web3-content {
+            height: 300px; overflow-y: auto; border: 1px solid #21262d;
+            padding: 15px; border-radius: 8px; background: #161b22;
+            font-size: 13px; line-height: 1.6; color: #8b949e; margin-bottom: 20px;
+        }
+        .web3-content h3 { color: #f0f6fc; font-size: 14px; margin: 15px 0 5px 0; }
+        .web3-content p { margin: 0 0 10px 0; }
+        .web3-footer { display: flex; flex-direction: column; gap: 10px; }
+        .web3-check-label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12px; }
+        .web3-check-label input { margin-top: 3px; accent-color: #238636; }
+        .web3-confirm-btn {
+            background: #238636; color: white; border: none; padding: 14px;
+            border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .web3-confirm-btn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+        .web3-confirm-btn:not(:disabled):hover { background: #2ea043; }
+        /* Стили скроллбара */
+        .web3-content::-webkit-scrollbar { width: 6px; }
+        .web3-content::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+    `;
+    document.head.appendChild(style);
+    document.body.style.overflow = 'hidden';
+
+    const modal = document.createElement('div');
+    modal.id = 'web3-legal-overlay';
+    modal.innerHTML = `
+        <div class="web3-modal">
+            <h2>Terms of Service</h2>
+            <div class="web3-content">
+                <p>Добро пожаловать на <b>web3my.netlify.app</b>. Пожалуйста, внимательно ознакомьтесь с данным соглашением перед использованием сервиса.</p>
+                
+                <h3>1. Риски криптовалют и смарт-контрактов</h3>
+                <p>Использование технологий блокчейн, смарт-контрактов и криптоактивов сопряжено с высоким риском. Вы подтверждаете, что обладаете достаточными знаниями для работы с Web3-инструментами.</p>
+                
+                <h3>2. Отказ от ответственности</h3>
+                <p>Сайт предоставляется по принципу "AS IS" (как есть). Администрация и разработчики не несут ответственности за любые убытки, потерю токенов, взломы кошельков или ошибки в работе сетей (Ethereum, BSC, Polygon и др.), возникшие в ходе использования данного ресурса.</p>
+                
+                <h3>3. Безопасность ключей</h3>
+                <p>Вы несете единоличную ответственность за сохранность своих приватных ключей, сид-фраз и доступ к своим кошелькам (MetaMask, TrustWallet и т.д.). Мы никогда не запрашиваем вашу секретную информацию.</p>
+                
+                <h3>4. Соответствие законодательству</h3>
+                <p>Пользователь обязан самостоятельно убедиться, что использование данного сервиса не нарушает законы его страны или юрисдикции. Вы подтверждаете, что не являетесь резидентом стран, находящихся под санкциями.</p>
+                
+                <h3>5. Сторонние протоколы</h3>
+                <p>Любые взаимодействия с внешними протоколами (Uniswap, PancakeSwap и т.д.) регулируются условиями этих сторонних площадок.</p>
+            </div>
+            
+            <div class="web3-footer">
+                <label class="web3-check-label">
+                    <input type="checkbox" id="web3-check">
+                    Я подтверждаю, что мне исполнилось 18 лет, я ознакомился с рисками и принимаю условия использования сервиса в полном объеме.
+                </label>
+                <button id="web3-accept" class="web3-confirm-btn" disabled>ПОДТВЕРДИТЬ И ВОЙТИ</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const checkbox = document.getElementById('web3-check');
+    const btn = document.getElementById('web3-accept');
+
+    checkbox.onchange = () => { btn.disabled = !checkbox.checked; };
+    
+    btn.onclick = () => {
+        modal.remove();
+        document.body.style.overflow = 'auto';
+        localStorage.setItem('web3_agreed_full', 'true');
+    };
+}
+
+// Вызов функции
+initWeb3LegalAlert();
+    
+</script>
