@@ -1,27 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <meta name="description" content="Удобный сервис для создания видео-стены 3х3. Смотрите 9 YouTube трансляций или видео одновременно на одном экране. Идеально для мониторинга, стримов и охраны.">
-    <meta name="keywords" content="видео стена, 3x3 video wall, смотреть 9 видео сразу, youtube мультиэкран, мониторинг стримов, web3my">
+    <meta name="description" content="Удобный сервис для создания видео-стены 3х3.">
+    <meta name="keywords" content="видео стена, 3x3 video wall, youtube мультиэкран, web3my">
     <meta name="robots" content="index, follow">
-    <meta name="google-site-verification" content="3grPkXZvX_CWEF3eI1WhKGb_M-H1n-HQwh4v9A619u8">
-
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://web3my.netlify.app/">
-    <meta property="og:title" content="3×3 Video Wall — Девять видео на одном экране">
-    <meta property="og:description" content="Сервис для одновременного просмотра 9 YouTube видео. Вставь ссылку и смотри всё сразу.">
-    <meta property="og:image" content="https://web3my.netlify.app/og-image.jpg">
-
-    <title>web3my - items</title>
+    <title>web3my - Dashboard</title>
 
     <style>
-        /* ============================================
-           ПЕРЕМЕННЫЕ ЦВЕТОВОЙ СХЕМЫ
-           ============================================ */
         :root {
             --vanille: #fefdf5;
             --turquoise: #40e0d0;
@@ -29,27 +17,18 @@
             --sidebar-w: 260px;
         }
 
-        /* ============================================
-           БАЗОВЫЕ СТИЛИ
-           ============================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--vanille);
             color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             height: 100vh;
             display: flex;
             overflow: hidden;
         }
 
-        /* ============================================
-           ЛЕВОЕ МЕНЮ (САЙДБАР)
-           ============================================ */
+        /* САЙДБАР */
         .sidebar {
             width: var(--sidebar-w);
             background: white;
@@ -58,6 +37,7 @@
             flex-direction: column;
             padding: 20px;
             z-index: 10;
+            overflow-y: auto; /* Добавлен скролл для длинного списка игр */
         }
 
         .sidebar h2 {
@@ -65,6 +45,7 @@
             color: var(--turquoise);
             margin-bottom: 15px;
             text-align: center;
+            letter-spacing: 2px;
         }
 
         .nav-item {
@@ -77,25 +58,26 @@
             font-size: 12px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .nav-item:hover {
             background: var(--turquoise);
             color: white;
             border-color: var(--turquoise);
+            transform: translateX(5px);
         }
 
         .sidebar-footer {
-            margin-top: auto;
+            margin-top: 20px;
+            padding-top: 10px;
             font-size: 10px;
             opacity: 0.5;
             text-align: center;
+            border-top: 1px solid #eee;
         }
 
-        /* ============================================
-           ПРАВАЯ ЧАСТЬ - ВИДЕОЭКРАНЫ
-           ============================================ */
+        /* КОНТЕНТ */
         .viewport-container {
             flex: 1;
             display: flex;
@@ -110,21 +92,20 @@
             overflow: hidden;
         }
 
-        .frame-section:last-child {
-            border-bottom: none;
-        }
+        .frame-section:last-child { border-bottom: none; }
 
         .label {
             position: absolute;
-            top: 5px;
+            top: 10px;
             left: 10px;
             background: var(--turquoise);
             color: white;
-            padding: 2px 10px;
+            padding: 4px 12px;
             font-size: 10px;
             border-radius: 5px;
             z-index: 5;
             font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         iframe {
@@ -133,359 +114,97 @@
             border: none;
         }
 
-        /* ============================================
-           АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
-           ============================================ */
+        /* АДАПТИВ */
         @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
+            body { flex-direction: column; }
             .sidebar {
                 width: 100%;
                 height: auto;
+                max-height: 200px;
                 flex-direction: row;
                 overflow-x: auto;
                 padding: 10px;
-                border-right: none;
-                border-bottom: 1px solid #eee;
             }
-
-            .nav-item {
-                margin-right: 10px;
-                min-width: 120px;
-                margin-bottom: 0;
-            }
-
-            .sidebar-footer {
-                margin-left: auto;
-                margin-top: 0;
-            }
-
-            .viewport-container {
-                height: calc(100vh - 80px);
-            }
-        }
-
-        /* ============================================
-           МОДАЛЬНОЕ ОКНО (DISCLAIMER)
-           ============================================ */
-        #web3-legal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            font-family: sans-serif;
-        }
-
-        .web3-modal {
-            background: #0d1117;
-            color: #e6edf3;
-            width: 90%;
-            max-width: 550px;
-            border-radius: 15px;
-            border: 1px solid #30363d;
-            padding: 25px;
-            box-shadow: 0 0 50px rgba(0, 255, 163, 0.2);
-        }
-
-        .web3-modal h2 {
-            text-align: center;
-            color: #58a6ff;
-            margin-bottom: 15px;
-        }
-
-        .web3-content {
-            height: 250px;
-            overflow-y: auto;
-            border: 1px solid #21262d;
-            padding: 15px;
-            border-radius: 8px;
-            background: #010409;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #8b949e;
-            margin: 15px 0;
-        }
-
-        .web3-content p {
-            margin-bottom: 10px;
-        }
-
-        .web3-content ul {
-            margin-left: 20px;
-            margin-bottom: 10px;
-        }
-
-        .web3-content li {
-            margin-bottom: 5px;
-        }
-
-        .web3-confirm-btn {
-            background: #238636;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.3s ease;
-        }
-
-        .web3-confirm-btn:hover {
-            background: #2ea043;
-        }
-
-        /* Скролбар для модальной информации */
-        .web3-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .web3-content::-webkit-scrollbar-track {
-            background: #010409;
-        }
-
-        .web3-content::-webkit-scrollbar-thumb {
-            background: #30363d;
-            border-radius: 3px;
-        }
-
-        .web3-content::-webkit-scrollbar-thumb:hover {
-            background: #484f58;
+            .nav-item { margin-right: 10px; min-width: 140px; margin-bottom: 0; }
+            .viewport-container { height: calc(100vh - 200px); }
         }
     </style>
 </head>
-
 <body>
 
-    <!-- ============================================
-         НАВИГАЦИОННОЕ МЕНЮ (САЙДБАР)
-         ============================================ -->
     <nav class="sidebar">
         <h2>DASHBOARD</h2>
-<div class="nav-item" onclick="location.href='https://drawingtogether.netlify.app/'">
-            DrawingTogether
-</div>
-    <div class="nav-item" onclick="location.href='https://reinhref.netlify.app/'">
-            /Rein Href
-    </div>
-        <div class="nav-item" onclick="location.href='https://readflowblock.netlify.app/'">
-            ReadFlowBlock
-        </div>
-        <div class="nav-item" onclick="location.href='https://web3video.netlify.app'">
-            Video Full
-        </div>
-
-        <div class="nav-item" onclick="location.href='https://web3audio.netlify.app'">
-            Audio Fun
-        </div>
-
-        <div class="nav-item" onclick="location.href='https://relaxstar.netlify.app'">
-            Relax Star
-        </div>
-
-        <div class="nav-item" onclick="location.href='https://stackliner.netlify.app/'">
-            Game1
-        </div>
-
-        <div class="nav-item" onclick="location.href='https://ball-bell.netlify.app/'">
-            Game2
-        </div>
-        <div class="nav-item" onclick="location.href='https://glasssmall.netlify.app/'">
-            Game 3
-        </div>
-        <div class="nav-item" onclick="location.href='https://pianorain.netlify.app/'">
-            Game "pianorain"
-        </div>
-        <div class="nav-item" onclick="location.href='https://geometryninja.netlify.app/'">
-            Game "GeometryNinja"
-        </div>
-        <div class="nav-item" onclick="location.href='https://bouncearea.netlify.app/'">
-            Game "BounceArea"
-        </div>
-        <div class="nav-item" onclick="location.href='https://stakebounce.netlify.app/'">
-            Game "StakeBounce"
-        </div>
-        <div class="nav-item" onclick="location.href='https://pianosteps.netlify.app/'">
-            Game "pianosteps"
-        </div>
-        <div class="nav-item" onclick="location.href='https://physicaldrawing.netlify.app/'">
-            Game "PhysicalDrawing"
-        </div>
-        <div class="nav-item" onclick="location.href='https://starstaps.netlify.app/'">
-            Game "starstaps"
-        </div>
-        <div class="nav-item" onclick="location.href='https://rengerarena.netlify.app/'">
-            Game "RengerArena"
-        </div>
-        <div class="nav-item" onclick="location.href='https://jumpbounce.netlify.app/'">
-           Game JumpBounce 
-        </div>
-        <div class="nav-item" onclick="location.href='https://needlewhite.netlify.app/'">
-           Game NeedleWhite 
-        </div>
-        <div class="nav-item" onclick="location.href='https://triangle-tree.netlify.app/'">
-           Game Triangle - Tree
-        </div>
-        <div class="nav-item" onclick="location.href='https://starframes.netlify.app/'">
-            StarFrames
-        </div>
-        <div class="nav-item" onclick="location.href='https://musicscreen.netlify.app/'">
-            MusikScreen 
-        </div>
-        <div class="nav-item" onclick="location.href='https://agka.netlify.app/'">
-            Game "AGKA"
-        </div>
-        <div class="nav-item" onclick="location.href='https://web3cp.netlify.app/'">
-            Donate for me
-        </div>
+        <div class="nav-item" onclick="location.href='https://drawingtogether.netlify.app/'">DrawingTogether</div>
+        <div class="nav-item" onclick="location.href='https://reinhref.netlify.app/'">/Rein Href</div>
+        <div class="nav-item" onclick="location.href='https://readflowblock.netlify.app/'">ReadFlowBlock</div>
+        <div class="nav-item" onclick="location.href='https://web3video.netlify.app'">Video Full</div>
+        <div class="nav-item" onclick="location.href='https://web3audio.netlify.app'">Audio Fun</div>
+        <div class="nav-item" onclick="location.href='https://relaxstar.netlify.app'">Relax Star</div>
+        <div class="nav-item" onclick="location.href='https://stackliner.netlify.app/'">Game: StackLiner</div>
+        <div class="nav-item" onclick="location.href='https://ball-bell.netlify.app/'">Game: Ball-Bell</div>
+        <div class="nav-item" onclick="location.href='https://glasssmall.netlify.app/'">Game: GlassSmall</div>
+        <div class="nav-item" onclick="location.href='https://pianorain.netlify.app/'">Game: PianoRain</div>
+        <div class="nav-item" onclick="location.href='https://geometryninja.netlify.app/'">Game: GeometryNinja</div>
+        <div class="nav-item" onclick="location.href='https://bouncearea.netlify.app/'">Game: BounceArea</div>
+        <div class="nav-item" onclick="location.href='https://stakebounce.netlify.app/'">Game: StakeBounce</div>
+        <div class="nav-item" onclick="location.href='https://pianosteps.netlify.app/'">Game: PianoSteps</div>
+        <div class="nav-item" onclick="location.href='https://physicaldrawing.netlify.app/'">Game: PhysicalDrawing</div>
+        <div class="nav-item" onclick="location.href='https://starstaps.netlify.app/'">Game: StarsTaps</div>
+        <div class="nav-item" onclick="location.href='https://rengerarena.netlify.app/'">Game: RengerArena</div>
+        <div class="nav-item" onclick="location.href='https://jumpbounce.netlify.app/'">Game: JumpBounce</div>
+        <div class="nav-item" onclick="location.href='https://needlewhite.netlify.app/'">Game: NeedleWhite</div>
+        <div class="nav-item" onclick="location.href='https://triangle-tree.netlify.app/'">Game: Triangle Tree</div>
+        <div class="nav-item" onclick="location.href='https://starframes.netlify.app/'">StarFrames</div>
+        <div class="nav-item" onclick="location.href='https://musicscreen.netlify.app/'">MusicScreen</div>
+        <div class="nav-item" onclick="location.href='https://agka.netlify.app/'">Game: AGKA</div>
+        <div class="nav-item" onclick="location.href='https://web3cp.netlify.app/'" style="border-color: #238636;">Donate</div>
 
         <div class="sidebar-footer">
             VECTOR-SKAM © 2026
         </div>
     </nav>
 
-    <!-- ============================================
-         КОНТЕЙНЕР ВИДЕОЭКРАНОВ
-         ============================================ -->
     <div class="viewport-container">
-
-        <!-- Экран 1: Торговый терминал -->
         <div class="frame-section">
             <div class="label">TRADING TERMINAL</div>
             <iframe src="https://web3trade.netlify.app"></iframe>
         </div>
 
-        <!-- Экран 2: Видеопросмотр -->
         <div class="frame-section">
             <div class="label">VIDEO VIEWER 3x3</div>
             <iframe src="https://web3video.netlify.app"></iframe>
         </div>
-
     </div>
-
-    <!-- ============================================
-         СКРИПТ ДЛЯ УПРАВЛЕНИЯ МОДАЛЬНЫМ ОКНОМ
-         ============================================ -->
-    <script>
-        /**
-         * Инициализация модального окна с Legal Disclaimer
-         * Показывается при каждой загрузке страницы
-         */
-        function initWeb3LegalModal() {
-            // Создаем стили для модального окна
-            const style = document.createElement('style');
-            style.textContent = `
-                #web3-legal-overlay {
-                    animation: fadeIn 0.3s ease-in;
-                }
-
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                    }
-                    to {
-                        opacity: 1;
-                    }
-                }
-
-                .web3-modal {
-                    animation: slideUp 0.3s ease-out;
-                }
-
-                @keyframes slideUp {
-                    from {
-                        transform: translateY(20px);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateY(0);
-                        opacity: 1;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // Блокируем скролл основной страницы
-            document.body.style.overflow = 'hidden';
-
-            // Создаем разметку модального окна
-            const overlay = document.createElement('div');
-            overlay.id = 'web3-legal-overlay';
-            overlay.innerHTML = `
-                <div class="web3-modal">
-                    <h2>Legal Disclaimer</h2>
-                    <div class="web3-content">
-                        <p><b>ВНИМАНИЕ:</b> Вы входите на сайт web3my.netlify.app.</p>
-
-                        <p>Используя данный ресурс, вы подтверждаете, что:</p>
-
-                        <ul>
-                            <li>Осознаете риски потери цифровых активов.</li>
-                            <li>Действуете в соответствии с местным законодательством.</li>
-                            <li>Не будете предъявлять претензий разработчикам в случае программных сбоев.</li>
-                            <li>Ваши приватные ключи находятся только под вашим контролем.</li>
-                        </ul>
-
-                        <p>Данное предупреждение будет появляться при каждом входе в целях безопасности и напоминания о правилах платформы.</p>
-                    </div>
-
-                    <button id="web3-close-modal" class="web3-confirm-btn">
-                        Я ПОНИМАЮ И СОГЛАСЕН
-                    </button>
-                </div>
-            `;
-
-            // Добавляем модальное окно в DOM
-            document.body.appendChild(overlay);
-
-            // Логика закрытия модального окна
-            document.getElementById('web3-close-modal').addEventListener('click', () => {
-                overlay.remove();
-                document.body.style.overflow = 'auto';
-            });
-        }
-
-        // Инициализируем модальное окно при загрузке страницы
-        document.addEventListener('DOMContentLoaded', initWeb3LegalModal);
-    </script>
-
-</body>
-
-
-
-
-
-
 
     <div id="legal-loader"></div>
 
-<script>
-  (function() {
-    // Ссылка на ваш файл через CDN для правильной загрузки
-    const url = 'https://cdn.jsdelivr.net/gh/Vector-skam/yurist@main/alert_poly.html';
-
-    fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        // Вставляем содержимое файла в контейнер
-        document.getElementById('legal-loader').innerHTML = data;
-        
-        // Принудительно запускаем скрипты, которые находятся внутри загруженного HTML
-        const scripts = document.getElementById('legal-loader').querySelectorAll('script');
-        scripts.forEach(oldScript => {
-          const newScript = document.createElement("script");
-          Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-          oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
-      })
-      .catch(err => console.error('Ошибка загрузки юриста:', err));
-  })();
-</script>
-</html>
+    <script>
+        (function() {
+            const url = 'https://cdn.jsdelivr.net/gh/Vector-skam/yurist@main/alert_poly.html';
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text();
+                })
+                .then(data => {
+                    const loader = document.getElementById('legal-loader');
+                    loader.innerHTML = data;
+                    
+                    // Перезапуск скриптов из загруженного контента
+                    const scripts = loader.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement("script");
+                        Array.from(oldScript.attributes).forEach(attr => 
+                            newScript.setAttribute(attr.name, attr.value)
+                        );
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                })
+                .catch(err => console.error('Ошибка загрузки дисклеймера:', err));
+        })();
+    </script>
+</body>
+                                                   </html>
+                                                   
