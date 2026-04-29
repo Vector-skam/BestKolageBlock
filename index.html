@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <meta name="description" content="Удобный сервис для создания видео-стены 3х3.">
-    <meta name="keywords" content="видео стена, 3x3 video wall, youtube мультиэкран, web3my">
-    <meta name="robots" content="index, follow">
     <title>web3my - Dashboard</title>
 
     <style>
@@ -36,8 +33,9 @@
             display: flex;
             flex-direction: column;
             padding: 20px;
-            z-index: 10;
-            overflow-y: auto; /* Добавлен скролл для длинного списка игр */
+            z-index: 100; /* Поднял выше, чтобы точно не перекрывалось */
+            overflow-y: auto;
+            flex-shrink: 0;
         }
 
         .sidebar h2 {
@@ -68,21 +66,13 @@
             transform: translateX(5px);
         }
 
-        .sidebar-footer {
-            margin-top: 20px;
-            padding-top: 10px;
-            font-size: 10px;
-            opacity: 0.5;
-            text-align: center;
-            border-top: 1px solid #eee;
-        }
-
         /* КОНТЕНТ */
         .viewport-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             height: 100%;
+            position: relative;
         }
 
         .frame-section {
@@ -90,43 +80,80 @@
             position: relative;
             border-bottom: 2px solid var(--turquoise);
             overflow: hidden;
+            background: #fff; /* Фон, пока грузится фрейм */
         }
 
         .frame-section:last-child { border-bottom: none; }
 
-        .label {
+        /* ЯРЛЫК И КНОПКА */
+        .controls-wrapper {
             position: absolute;
             top: 10px;
             left: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 50;
+        }
+
+        .label {
             background: var(--turquoise);
             color: white;
             padding: 4px 12px;
             font-size: 10px;
             border-radius: 5px;
-            z-index: 5;
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .open-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--turquoise);
+            color: var(--text);
+            padding: 4px 8px;
+            font-size: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .open-btn:hover {
+            background: var(--turquoise);
+            color: white;
+        }
+
+        /* Настройка фреймов */
+        iframe { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            display: block;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            font-size: 10px;
+            opacity: 0.5;
+            text-align: center;
         }
 
         /* АДАПТИВ */
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            .sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 200px;
-                flex-direction: row;
-                overflow-x: auto;
-                padding: 10px;
+            .sidebar { 
+                width: 100%; 
+                height: auto; 
+                max-height: 150px; 
+                flex-direction: row; 
+                overflow-x: auto; 
+                padding: 10px; 
             }
             .nav-item { margin-right: 10px; min-width: 140px; margin-bottom: 0; }
-            .viewport-container { height: calc(100vh - 200px); }
+            .viewport-container { height: calc(100vh - 150px); }
         }
     </style>
 </head>
@@ -134,57 +161,87 @@
 
     <nav class="sidebar">
         <h2>DASHBOARD</h2>
-        <div class="nav-item" onclick="location.href='https://www.google.com/search?q=threejs&igu=1'">Google Search</div>
-        <div class="nav-item" onclick="location.href='https://wwwwebs.netlify.app/'">WWWWEBS</div>
-        <div class="nav-item" onclick="location.href='https://drawingtogether.netlify.app/'">DrawingTogether</div>
-        <div class="nav-item" onclick="location.href='https://sandbox3dtogether.netlify.app/'">/SandBox3DTogether</div>
-        <div class="nav-item" style="color: red;" onclick="location.href='https://web3universe.netlify.app/'">WEB3UNIVERSE</div>
-        <div class="nav-item" onclick="location.href='https://reinhref.netlify.app/'">/Rein Href</div>
-        <div class="nav-item" onclick="location.href='https://readflowblock.netlify.app/'">ReadFlowBlock</div>
-        <div class="nav-item" onclick="location.href='https://multichat3dcube.netlify.app/'">MultiChat3DCube</div>
-        <div class="nav-item" onclick="location.href='https://drawingtogether3d.netlify.app/'">DrawingTogether3D</div>
-        <div class="nav-item" onclick="location.href='https://web3video.netlify.app'">Video Full</div>
-        <div class="nav-item" onclick="location.href='https://web3audio.netlify.app'">Audio Fun</div>
-        <div class="nav-item" onclick="location.href='https://relaxstar.netlify.app'">Relax Star</div>
-        <div class="nav-item" onclick="location.href='https://ball-bell.netlify.app/'">Game: Ball-Bell</div>
-        <div class="nav-item" onclick="location.href='https://glasssmall.netlify.app/'">Game: GlassSmall</div>
-        <div class="nav-item" onclick="location.href='https://pianorain.netlify.app/'">Game: PianoRain</div>
-        <div class="nav-item" onclick="location.href='https://geometryninja.netlify.app/'">Game: GeometryNinja</div>
-        <div class="nav-item" onclick="location.href='https://bouncearea.netlify.app/'">Game: BounceArea</div>
-        <div class="nav-item" onclick="location.href='https://stakebounce.netlify.app/'">Game: StakeBounce</div>
-        <div class="nav-item" onclick="location.href='https://pianosteps.netlify.app/'">Game: PianoSteps</div>
-        <div class="nav-item" onclick="location.href='https://physicaldrawing.netlify.app/'">Game: PhysicalDrawing</div>
-        <div class="nav-item" onclick="location.href='https://starstaps.netlify.app/'">Game: StarsTaps</div>
-        <div class="nav-item" onclick="location.href='https://rengerarena.netlify.app/'">Game: RengerArena</div>
-        <div class="nav-item" onclick="location.href='https://jumpbounce.netlify.app/'">Game: JumpBounce</div>
-        <div class="nav-item" onclick="location.href='https://triangle-tree.netlify.app/'">Game: Triangle Tree</div>
-        <div class="nav-item" onclick="location.href='https://starframes.netlify.app/'">StarFrames</div>
-        <div class="nav-item" onclick="location.href='https://musicscreen.netlify.app/'">MusicScreen</div>
-        <div class="nav-item" onclick="location.href='https://agka.netlify.app/'">Game: AGKA</div>
-        <div class="nav-item" onclick="location.href='https://web3cp.netlify.app/'" style="border-color: #238636;">Donate</div>
+        <div class="nav-item" data-url="https://www.google.com/search?q=threejs&igu=1">Google Search</div>
+        <div class="nav-item" data-url="https://wwwwebs.netlify.app/">WWWWEBS</div>
+        <div class="nav-item" data-url="https://drawingtogether.netlify.app/">DrawingTogether</div>
+        <div class="nav-item" data-url="https://sandbox3dtogether.netlify.app/">SandBox3DTogether</div>
+        <div class="nav-item" data-url="https://web3universe.netlify.app/" style="color: red;">WEB3UNIVERSE</div>
+        <div class="nav-item" data-url="https://reinhref.netlify.app/">/Rein Href</div>
+        <div class="nav-item" data-url="https://readflowblock.netlify.app/">ReadFlowBlock</div>
+        <div class="nav-item" data-url="https://multichat3dcube.netlify.app/">MultiChat3DCube</div>
+        <div class="nav-item" data-url="https://drawingtogether3d.netlify.app/">DrawingTogether3D</div>
+        <div class="nav-item" data-url="https://web3video.netlify.app">Video Full</div>
+        <div class="nav-item" data-url="https://web3audio.netlify.app">Audio Fun</div>
+        <div class="nav-item" data-url="https://relaxstar.netlify.app">Relax Star</div>
+        <div class="nav-item" data-url="https://ball-bell.netlify.app/">Game: Ball-Bell</div>
+        <div class="nav-item" data-url="https://glasssmall.netlify.app/">Game: GlassSmall</div>
+        <div class="nav-item" data-url="https://pianorain.netlify.app/">Game: PianoRain</div>
+        <div class="nav-item" data-url="https://geometryninja.netlify.app/">Game: GeometryNinja</div>
+        <div class="nav-item" data-url="https://bouncearea.netlify.app/">Game: BounceArea</div>
+        <div class="nav-item" data-url="https://stakebounce.netlify.app/">Game: StakeBounce</div>
+        <div class="nav-item" data-url="https://pianosteps.netlify.app/">Game: PianoSteps</div>
+        <div class="nav-item" data-url="https://physicaldrawing.netlify.app/">Game: PhysicalDrawing</div>
+        <div class="nav-item" data-url="https://starstaps.netlify.app/">Game: StarsTaps</div>
+        <div class="nav-item" data-url="https://rengerarena.netlify.app/">Game: RengerArena</div>
+        <div class="nav-item" data-url="https://jumpbounce.netlify.app/">Game: JumpBounce</div>
+        <div class="nav-item" data-url="https://triangle-tree.netlify.app/">Game: Triangle Tree</div>
+        <div class="nav-item" data-url="https://starframes.netlify.app/">StarFrames</div>
+        <div class="nav-item" data-url="https://musicscreen.netlify.app/">MusicScreen</div>
+        <div class="nav-item" data-url="https://agka.netlify.app/">Game: AGKA</div>
+        <div class="nav-item" data-url="https://web3cp.netlify.app/" style="border-color: #238636;">Donate</div>
         
-        <div class="sidebar-footer">
-            MAKSYM DIDUKH © 2026
-        </div>
+        <div class="sidebar-footer">MAKSYM DIDUKH © 2026</div>
     </nav>
 
     <div class="viewport-container">
         <div class="frame-section">
-            <div class="label">DRAWINGTOGETHER3D</div>
-            <iframe src="https://drawingtogether3d.netlify.app"></iframe>
+            <div class="controls-wrapper">
+                <div class="label" id="frameLabel">DRAWINGTOGETHER3D</div>
+                <a href="https://drawingtogether3d.netlify.app" target="_blank" class="open-btn" id="externalLink">↗</a>
+            </div>
+            <iframe id="myIframe" 
+                    src="https://drawingtogether3d.netlify.app" 
+                    sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-scripts allow-same-origin">
+            </iframe>
         </div>
 
         <div class="frame-section">
-            <div class="label">VIDEO VIEWER 3x3</div>
-            <iframe src="https://web3video.netlify.app"></iframe>
+            <div class="controls-wrapper">
+                <div class="label">VIDEO VIEWER 3x3</div>
+                <a href="https://web3video.netlify.app" target="_blank" class="open-btn">↗</a>
+            </div>
+            <iframe src="https://web3video.netlify.app" 
+                    sandbox="allow-forms allow-scripts allow-same-origin">
+            </iframe>
         </div>
     </div>
+    
+    <script>
+        const links = document.querySelectorAll(".nav-item");
+        const iframe = document.getElementById("myIframe");
+        const label = document.getElementById("frameLabel");
+        const externalLink = document.getElementById("externalLink");
 
-    
-    
+        links.forEach(link => {
+            link.addEventListener("click", function() {
+                const newUrl = this.getAttribute("data-url");
+                
+                if (newUrl) {
+                    // Если это Google, он часто ломает фреймы. 
+                    // Лучше открыть его в новом окне, чтобы не "падал" дашборд.
+                    if (newUrl.includes("google.com")) {
+                        window.open(newUrl, '_blank');
+                        return; // Прекращаем выполнение, не меняя src фрейма
+                    }
+
+                    // Для остальных сайтов обновляем фрейм
+                    iframe.src = newUrl;
+                    label.textContent = this.textContent;
+                    externalLink.href = newUrl;
+                }
+            });
+        });
     </script>
     <script src="https://dmamax.netlify.app/legal-module.js"></script>
-    
 </body>
- </html>
-                                                   
+</html>
