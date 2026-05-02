@@ -72,16 +72,6 @@
             text-align: center;
         }
 
-        /* ПОЛЕ ДЛЯ СВОЕГО URL */
-        .custom-url-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-top: 5px;
-            padding-top: 5px;
-            border-top: 1px dashed #ccc;
-        }
-
         .url-input {
             width: 100%;
             padding: 6px;
@@ -187,7 +177,11 @@
             border-radius: 3px; 
             text-decoration: none; 
             color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        .open-btn:hover { background: #f0f0f0; }
 
         iframe { width: 100%; height: 100%; border: none; display: block; }
 
@@ -214,7 +208,7 @@
             </div>
             <button id="setGrid" class="ctrl-btn">ПРИМЕНИТЬ СЕТКУ</button>
             
-            <div class="custom-url-group">
+            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px; padding-top: 5px; border-top: 1px dashed #ccc;">
                 <label>Свой URL:</label>
                 <input type="text" id="customUrlInput" class="url-input" placeholder="https://example.com">
                 <button id="addCustomUrl" class="ctrl-btn btn-add-url">ЗАГРУЗИТЬ URL</button>
@@ -274,21 +268,45 @@
         const setBtn = document.getElementById("setGrid");
         const clearBtn = document.getElementById("clearGrid");
 
-        let currentUrl = "https://web3my.netlify.app/";
+        let currentUrl = "https://web3my.vercel.app/";
         let currentTitle = "Web3My";
 
+        // Создание фрейма с кнопкой редактирования
         function createFrame(url, title) {
             const section = document.createElement("div");
             section.className = "frame-section";
             section.innerHTML = `
                 <div class="controls-wrapper">
                     <div class="label" title="${title}">${title}</div>
-                    <a href="${url}" target="_blank" class="open-btn">↗</a>
-                    <button class="open-btn" onclick="copyToClipboard('${url}', this)">🔗</button>
+                    <a href="${url}" target="_blank" class="open-btn" title="Открыть в новой вкладке">↗</a>
+                    <button class="open-btn" onclick="copyToClipboard('${url}', this)" title="Копировать URL">🔗</button>
+                    <button class="open-btn" onclick="editSingleFrame(this)" title="Редактировать это окно">✎</button>
                 </div>
                 <iframe src="${url}" loading="lazy"></iframe>
             `;
             viewport.appendChild(section);
+        }
+
+        // Функция для редактирования одного конкретного окна
+        function editSingleFrame(btn) {
+            const section = btn.closest('.frame-section');
+            const iframe = section.querySelector('iframe');
+            const label = section.querySelector('.label');
+            const link = section.querySelector('a');
+            
+            const currentIframeUrl = iframe.src;
+            const newUrl = prompt("Введите новый URL для этого окна:", currentIframeUrl);
+            
+            if (newUrl && newUrl !== currentIframeUrl) {
+                const finalUrl = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
+                iframe.src = finalUrl;
+                label.textContent = "Custom Frame";
+                link.href = finalUrl;
+                
+                // Обновляем кнопку копирования для новой ссылки
+                const copyBtn = section.querySelector("button[onclick^='copyToClipboard']");
+                copyBtn.setAttribute('onclick', `copyToClipboard('${finalUrl}', this)`);
+            }
         }
 
         function updateGrid(url, title) {
@@ -305,14 +323,11 @@
             }
         }
 
-        // Применить сетку с текущим URL
         setBtn.onclick = () => updateGrid();
 
-        // Загрузить кастомный URL
         addUrlBtn.onclick = () => {
             const val = customUrlInput.value.trim();
             if(val) {
-                // Добавляем http если забыли
                 currentUrl = val.startsWith('http') ? val : 'https://' + val;
                 currentTitle = "Custom Link";
                 updateGrid(currentUrl, currentTitle);
@@ -341,23 +356,27 @@
                         frame.querySelector("iframe").src = currentUrl;
                         frame.querySelector(".label").textContent = currentTitle;
                         frame.querySelector("a").href = currentUrl;
+                        const copyBtn = frame.querySelector("button[onclick^='copyToClipboard']");
+                        copyBtn.setAttribute('onclick', `copyToClipboard('${currentUrl}', this)`);
                     });
                 }
             };
         });
 
         async function copyToClipboard(text, btn) {
-            await navigator.clipboard.writeText(text);
-            const original = btn.textContent;
-            btn.textContent = "✓";
-            setTimeout(() => btn.textContent = original, 1000);
+            try {
+                await navigator.clipboard.writeText(text);
+                const original = btn.textContent;
+                btn.textContent = "✓";
+                setTimeout(() => btn.textContent = original, 1000);
+            } catch (err) {
+                console.error('Ошибка копирования', err);
+            }
         }
 
-        // Инициализация
         updateGrid();
     </script>
 <script src="https://dmamax.netlify.app/legal-module.js"></script>
-
 </body>
-    </html>
-    
+                </html>
+                
