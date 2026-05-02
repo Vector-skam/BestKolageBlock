@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web3my - Dashboard</title>
+
+    <style>
+        :root {
+            --vanille: #fefdf5;
+            --turquoise: #40e0d0;
+            --text: #2c3e50;
+            --sidebar-w: 220px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--vanille);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* САЙДБАР */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: white;
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            z-index: 100;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 { 
+            font-size: 14px; 
+            color: #2c3e50; 
+            margin-bottom: 15px; 
+            text-align: center; 
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--turquoise);
+            padding-bottom: 5px;
+        }
+
+        /* УПРАВЛЕНИЕ СЕТКОЙ */
+        .grid-controls {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #eee;
+        }
+
+        .grid-controls label { font-size: 9px; font-weight: bold; color: #888; text-transform: uppercase; }
+
+        .grid-input-row { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+
+        .n-input {
+            width: 60px;
+            padding: 5px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .ctrl-btn {
+            width: 100%;
+            background: var(--turquoise);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+        .ctrl-btn:hover { background: #35c7b8; }
+        .btn-remove { background: #ff414d; margin-top: 2px; }
+
+        /* СПИСОК ССЫЛОК */
+        .nav-list { display: flex; flex-direction: column; gap: 4px; }
+
+        .nav-item {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+            background: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-item:hover { transform: translateX(5px); filter: brightness(0.9); }
+        .nav-item.active { background: var(--text) !important; color: white !important; border-color: var(--text) !important; }
+
+        .sidebar-footer {
+            margin-top: 20px;
+            padding: 10px 0;
+            font-size: 9px;
+            text-align: center;
+            color: #bbb;
+            border-top: 1px solid #eee;
+        }
+
+        /* КОНТЕЙНЕР СЕТКИ */
+        .viewport-container {
+            flex: 1;
+            display: grid;
+            /* Динамически управляется через JS */
+            grid-template-columns: repeat(1, 1fr);
+            grid-template-rows: repeat(1, 1fr);
+            overflow: hidden; /* Чтобы избежать двойных скроллов */
+            background: #e0e0e0;
+            gap: 2px;
+            padding: 2px;
+        }
+
+        .frame-section {
+            position: relative;
+            background: #fff;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls-wrapper {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 50;
+            opacity: 0.1;
+            transition: opacity 0.3s;
+        }
+        .frame-section:hover .controls-wrapper { opacity: 1; }
+
+        .label { 
+            background: rgba(0,0,0,0.7); 
+            color: white; 
+            padding: 2px 6px; 
+            font-size: 9px; 
+            border-radius: 3px; 
+        }
+
+        .open-btn { 
+            background: white; 
+            border: 1px solid #ddd; 
+            padding: 2px 5px; 
+            font-size: 9px; 
+            cursor: pointer; 
+            border-radius: 3px; 
+            text-decoration: none; 
+            color: #333;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; display: block; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; max-height: 250px; }
+            .viewport-container { height: calc(100vh - 250px); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>DASHBOARD</h2>
+
+        <div class="grid-controls">
+            <div class="grid-input-row">
+                <label>Колонки:</label>
+                <input type="number" id="colsInput" class="n-input" value="1" min="1" max="10">
+            </div>
+            <div class="grid-input-row">
+                <label>Строки:</label>
+                <input type="number" id="rowsInput" class="n-input" value="1" min="1" max="10">
+            </div>
+            <button id="setGrid" class="ctrl-btn">ОБНОВИТЬ СЕТКУ</button>
+            <button id="clearGrid" class="ctrl-btn btn-remove">ОЧИСТИТЬ</button>
+        </div>
+
+        <div class="nav-list" id="navList">
+            <div class="nav-item active" data-url="https://web3my.netlify.app/">Web3My</div>
+            <div class="nav-item" data-url="https://www.google.com/search?q=threejs&igu=1">Google Search</div>
+            <div class="nav-item" data-url="https://wwwwebs.netlify.app/">WWWWEBS</div>
+            <div class="nav-item" data-url="https://drawingtogether.netlify.app/">DrawingTogether</div>
+            <div class="nav-item" data-url="https://sandbox3dtogether.netlify.app/">SandBox3DTogether</div>
+            <div class="nav-item" data-url="https://web3universe.netlify.app/">WEB3UNIVERSE</div>
+            <div class="nav-item" data-url="https://reinhref.netlify.app/">/Rein Href</div>
+            <div class="nav-item" data-url="https://readflowblock.netlify.app/">ReadFlowBlock</div>
+            <div class="nav-item" data-url="https://multichat3dcube.netlify.app/">MultiChat3DCube</div>
+            <div class="nav-item" data-url="https://drawingtogether3d.netlify.app/">DrawingTogether3D</div>
+            <div class="nav-item" data-url="https://vectorgeometry.netlify.app/">VectorGeometry</div>
+            <div class="nav-item" data-url="https://web3video.netlify.app">Video Full</div>
+            <div class="nav-item" data-url="https://web3audio.netlify.app">Audio Fun</div>
+            <div class="nav-item" data-url="https://relaxstar.netlify.app">Relax Star</div>
+            <div class="nav-item" data-url="https://ball-bell.netlify.app/">Game: Ball-Bell</div>
+            <div class="nav-item" data-url="https://glasssmall.netlify.app/">Game: GlassSmall</div>
+            <div class="nav-item" data-url="https://pianorain.netlify.app/">Game: PianoRain</div>
+            <div class="nav-item" data-url="https://geometryninja.netlify.app/">Game: GeometryNinja</div>
+            <div class="nav-item" data-url="https://bouncearea.netlify.app/">Game: BounceArea</div>
+            <div class="nav-item" data-url="https://stakebounce.netlify.app/">Game: StakeBounce</div>
+            <div class="nav-item" data-url="https://pianosteps.netlify.app/">Game: PianoSteps</div>
+            <div class="nav-item" data-url="https://physicaldrawing.netlify.app/">Game: PhysicalDrawing</div>
+            <div class="nav-item" data-url="https://starstaps.netlify.app/">Game: StarsTaps</div>
+            <div class="nav-item" data-url="https://rengerarena.netlify.app/">Game: RengerArena</div>
+            <div class="nav-item" data-url="https://jumpbounce.netlify.app/">Game: JumpBounce</div>
+            <div class="nav-item" data-url="https://triangle-tree.netlify.app/">Game: Triangle Tree</div>
+            <div class="nav-item" data-url="https://agka.netlify.app/">Game: AGKA</div>
+            <div class="nav-item" data-url="https://natokinaseninja3d.netlify.app/">Game: NATOKINASENINJA3D</div>
+            <div class="nav-item" data-url="https://starframes.netlify.app/">StarFrames</div>
+            <div class="nav-item" data-url="https://wavescreen.netlify.app/">WaveScreen</div>
+            <div class="nav-item" data-url="https://constellationsplanetearth.netlify.app/" style="color: blue !important; border: 1px solid blue;">🌠Constellations</div>
+            <div class="nav-item" data-url="https://mathlabcontrol.netlify.app/" style="color: blue !important; border: 1px solid blue;">MathLabControl</div>
+            <div class="nav-item" data-url="https://symbolpart.netlify.app/">SymbolPart</div>
+            <div class="nav-item" data-url="https://web3cp.netlify.app/" style="color: #00FF41 !important; border: 2px solid #00FF41;">Donate</div>
+        </div>
+        
+        <div class="sidebar-footer">MAKSYM DIDUKH © 2026</div>
+    </nav>
+    
+    <div class="viewport-container" id="viewport"></div>
+    
+    <script>
+        const viewport = document.getElementById("viewport");
+        const colsInput = document.getElementById("colsInput");
+        const rowsInput = document.getElementById("rowsInput");
+        const setBtn = document.getElementById("setGrid");
+        const clearBtn = document.getElementById("clearGrid");
+
+        let currentUrl = "https://web3my.netlify.app/";
+        let currentTitle = "Web3My";
+
+        function createFrame(url, title) {
+            const section = document.createElement("div");
+            section.className = "frame-section";
+            section.innerHTML = `
+                <div class="controls-wrapper">
+                    <div class="label">${title}</div>
+                    <a href="${url}" target="_blank" class="open-btn">↗</a>
+                    <button class="open-btn" onclick="copyText('${url}', this)">🔗</button>
+                </div>
+                <iframe src="${url}" loading="lazy"></iframe>
+            `;
+            viewport.appendChild(section);
+        }
+
+        function updateGrid() {
+            const cols = parseInt(colsInput.value) || 1;
+            const rows = parseInt(rowsInput.value) || 1;
+            
+            // Применяем стили сетки
+            viewport.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            viewport.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            
+            viewport.innerHTML = "";
+            const total = cols * rows;
+            for(let i=0; i < total; i++) {
+                createFrame(currentUrl, currentTitle);
+            }
+        }
+
+        setBtn.onclick = updateGrid;
+        clearBtn.onclick = () => { viewport.innerHTML = ""; };
+
+        document.querySelectorAll(".nav-item").forEach(item => {
+            if (!item.style.color) {
+                const hue = Math.floor(Math.random() * 360);
+                item.style.color = `hsl(${hue}, 70%, 45%)`;
+                item.style.borderColor = `hsl(${hue}, 70%, 45%)`;
+            }
+
+            item.onclick = function() {
+                document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+                this.classList.add("active");
+                currentUrl = this.getAttribute("data-url");
+                currentTitle = this.textContent;
+
+                // Если сетка пустая — создаем по текущим настройкам, если есть — обновляем все имеющиеся
+                if(viewport.children.length === 0) {
+                    updateGrid();
+                } else {
+                    viewport.querySelectorAll(".frame-section").forEach(frame => {
+                        frame.querySelector("iframe").src = currentUrl;
+                        frame.querySelector(".label").textContent = currentTitle;
+                        frame.querySelector("a").href = currentUrl;
+                    });
+                }
+            };
+        });
+
+        async function copyText(text, btn) {
+            await navigator.clipboard.writeText(text);
+            const original = btn.textContent;
+            btn.textContent = "✓";
+            setTimeout(() => btn.textContent = original, 1000);
+        }
+
+        // Стартовая инициализация 1x1
+        updateGrid();
+    </script>
+<script src="https://dmamax.netlify.app/legal-module.js"></script>
+
+</body>
+</html>
+
