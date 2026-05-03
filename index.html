@@ -1,3 +1,209 @@
+          transition: opacity 0.3s;
+        }
+        .frame-section:hover .controls-wrapper { opacity: 1; }
+
+        .label { 
+            background: rgba(0,0,0,0.7); 
+            color: white; 
+            padding: 2px 6px; 
+            font-size: 9px; 
+            border-radius: 3px;
+        }
+
+        .open-btn { 
+            background: white; 
+            border: 1px solid #ddd; 
+            padding: 2px 4px; 
+            font-size: 10px; 
+            cursor: pointer; 
+            border-radius: 3px;
+            color: #333;
+        }
+        .btn-resize { background: #fff9db; border-color: #fab005; }
+        .btn-delete { background: #fff5f5; border-color: #ff8787; color: #fa5252; }
+
+        iframe { width: 100%; flex: 1; border: none; background: white; }
+
+        .sidebar-footer { margin-top: auto; padding: 10px 5px; font-size: 8px; text-align: center; color: #ccc; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>WEB3 - DASHBOARD</h2>
+
+        <div class="grid-controls">
+            <label>Меню:</label>
+            <button id="addBlankFrame" class="ctrl-btn" style="background: #2c3e50;">+ ОКНО</button>
+            <button onclick="location.reload()" class="ctrl-btn" style="background: #aaa;">СБРОС</button>
+        </div>
+
+        <div class="nav-list" id="navList">
+            <div class="nav-item" data-url="https://web3my.vercel.app/">Web3My</div>
+            <div class="nav-item" data-url="https://www.google.com/search?q=threejs&igu=1">Google Search</div>
+            <div class="nav-item" data-url="https://wwwwebs.netlify.app/">WWWWEBS</div>
+            <div class="nav-item" data-url="https://drawingtogether.netlify.app/">DrawingTogether</div>
+            <div class="nav-item" data-url="https://sprintwood.netlify.app/">SprintWood</div>
+            <div class="nav-item" data-url="https://sandbox3dtogether.netlify.app/">SandBox3DTogether</div>
+            <div class="nav-item" data-url="https://web3universe.netlify.app/">WEB3UNIVERSE</div>
+            <div class="nav-item" data-url="https://reinhref.netlify.app/">/Rein Href</div>
+            <div class="nav-item" data-url="https://readflowblock.netlify.app/">ReadFlowBlock</div>
+            <div class="nav-item" data-url="https://multichat3dcube.netlify.app/">MultiChat3DCube</div>
+            <div class="nav-item" data-url="https://drawingtogether3d.netlify.app/">DrawingTogether3D</div>
+            <div class="nav-item" data-url="https://vectorgeometry.netlify.app/">VectorGeometry</div>
+            <div class="nav-item" data-url="https://web3video.netlify.app">Video Full</div>
+            <div class="nav-item" data-url="https://web3audio.netlify.app">Audio Fun</div>
+            <div class="nav-item" data-url="https://relaxstar.netlify.app">Relax Star</div>
+            <div class="nav-item" data-url="https://ball-bell.netlify.app/">Game: Ball-Bell</div>
+            <div class="nav-item" data-url="https://glasssmall.netlify.app/">Game: GlassSmall</div>
+            <div class="nav-item" data-url="https://pianorain.netlify.app/">Game: PianoRain</div>
+            <div class="nav-item" data-url="https://geometryninja.netlify.app/">Game: GeometryNinja</div>
+            <div class="nav-item" data-url="https://bouncearea.netlify.app/">Game: BounceArea</div>
+            <div class="nav-item" data-url="https://stakebounce.netlify.app/">Game: StakeBounce</div>
+            <div class="nav-item" data-url="https://pianosteps.netlify.app/">Game: PianoSteps</div>
+            <div class="nav-item" data-url="https://physicaldrawing.netlify.app/">Game: PhysicalDrawing</div>
+            <div class="nav-item" data-url="https://starstaps.netlify.app/">Game: StarsTaps</div>
+            <div class="nav-item" data-url="https://rengerarena.netlify.app/">Game: RengerArena</div>
+            <div class="nav-item" data-url="https://jumpbounce.netlify.app/">Game: JumpBounce</div>
+            <div class="nav-item" data-url="https://triangle-tree.netlify.app/">Game: Triangle Tree</div>
+            <div class="nav-item" data-url="https://agka.netlify.app/">Game: AGKA</div>
+            <div class="nav-item" data-url="https://natokinaseninja3d.netlify.app/">Game: NATOKINASENINJA3D</div>
+            <div class="nav-item" data-url="https://starframes.netlify.app/">StarFrames</div>
+            <div class="nav-item" data-url="https://wavescreen.netlify.app/">WaveScreen</div>
+            <div class="nav-item" data-url="https://constellationsplanetearth.netlify.app/" style="color: blue !important;">🌠Constell.</div>
+ <div class="nav-item" data-url="https://mathlabcontrol.netlify.app/" style="color: blue !important;">MathLab</div>
+            <div class="nav-item" data-url="https://symbolpart.netlify.app/">SymbolPart</div>
+            <div class="nav-item" data-url="https://web3cp.netlify.app/" style="color: #00FF41 !important;">Donate</div>
+        </div>
+        
+        <div class="sidebar-footer">MAKSYM DIDUKH © 2026</div>
+    </nav>
+    
+    <div class="viewport-container" id="viewport"></div>
+    
+    <script>
+    const viewport = document.getElementById("viewport");
+    const addBtn = document.getElementById("addBlankFrame");
+
+    // --- 1. ФУНКЦИЯ СОЗДАНИЯ ОКНА (IFRAME) ---
+    function createFrame(url, title) {
+        const section = document.createElement("div");
+        section.className = "frame-section";
+        section.style.gridColumn = "span 8";
+        section.style.gridRow = "span 6";
+
+        section.innerHTML = `
+            <div class="controls-wrapper">
+                <div class="label">${title}</div>
+                <button class="open-btn" onclick="editUrl(this)">✎</button>
+                <button class="open-btn btn-resize" onclick="resizeWidth(this)">↔</button>
+                <button class="open-btn btn-resize" onclick="resizeHeight(this)">↕</button>
+                <button class="open-btn btn-delete" onclick="this.closest('.frame-section').remove()">✕</button>
+            </div>
+            <iframe src="${url}" loading="lazy"></iframe>
+        `;
+        viewport.appendChild(section);
+    }
+
+    // --- 2. НАСТРОЙКА ПУНКТОВ МЕНЮ И КНОПОК КОПИРОВАНИЯ ---
+    document.querySelectorAll(".nav-item").forEach(item => {
+        // Стилизуем родительский элемент для позиционирования
+        item.style.position = 'relative';
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.paddingRight = '30px'; // Место под кнопку, чтобы текст не сливался
+
+        // Рандомный цвет полоски
+        const hue = Math.floor(Math.random() * 360);
+        if(!item.style.color) item.style.borderLeft = `3px solid hsl(${hue}, 70%, 50%)`;
+
+        // Оборачиваем текст
+        const textContent = item.textContent;
+        item.innerHTML = `<span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${textContent}</span>`;
+
+        // Создаем кнопку копирования поверх всего
+        const copyBtn = document.createElement('button');
+        copyBtn.innerHTML = '📋';
+        copyBtn.title = 'Копировать';
+        copyBtn.style.cssText = `
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: white; /* Фон, чтобы текст под кнопкой не просвечивал */
+            border: 1px solid #eee;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 2px 4px;
+            box-shadow: -2px 0 5px white; /* Мягкое скрытие текста слева от кнопки */
+        `;
+        
+        item.appendChild(copyBtn);
+
+        // Логика копирования
+        copyBtn.onclick = (e) => {
+            e.stopPropagation(); 
+            const url = item.getAttribute("data-url");
+            navigator.clipboard.writeText(url).then(() => {
+                const originalIcon = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅';
+                setTimeout(() => { copyBtn.innerHTML = originalIcon; }, 1000);
+            });
+        };
+
+        // Логика клика по пункту
+        item.onclick = function(e) {
+            if (e.target !== copyBtn) {
+                createFrame(this.getAttribute("data-url"), textContent);
+                viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+            }
+        };
+    });
+
+    // --- 3. ФУНКЦИИ УПРАВЛЕНИЯ ---
+    function resizeWidth(btn) {
+        const section = btn.closest('.frame-section');
+        const currentSpan = parseInt(section.style.gridColumn.split(' ')[1]);
+        const sizes = [3, 4, 6, 8, 12];
+        let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
+        section.style.gridColumn = `span ${sizes[nextIndex]}`;
+    }
+
+    function resizeHeight(btn) {
+        const section = btn.closest('.frame-section');
+        const currentSpan = parseInt(section.style.gridRow.split(' ')[1]);
+        const sizes = [1, 2, 3, 4, 6];
+        let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
+        section.style.gridRow = `span ${sizes[nextIndex]}`;
+    }
+
+    function editUrl(btn) {
+        const section = btn.closest('.frame-section');
+        const iframe = section.querySelector('iframe');
+        const label = section.querySelector('.label');
+        const newUrl = prompt("Введите URL:", iframe.src);
+        if (newUrl) {
+            const formatted = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
+            iframe.src = formatted;
+            label.textContent = "Custom";
+        }
+    }
+
+    addBtn.onclick = () => createFrame("https://web3my.vercel.app", "Empty");
+
+    createFrame("https://multichat3dcube.netlify.app/","3DCubeChat");
+    createFrame("https://natokinaseninja3d.netlify.app/","NatokinaseNinja3D");
+    createFrame("https://web3my.vercel.app/", "Web3My");
+    createFrame("https://web3universe.netlify.app/", "WWWWEBS");
+</script>
+
+
+    <script src="https://dmamax.netlify.app/legal-module.js"></script>
+</body>
+                </html>
+    
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -217,23 +423,35 @@
 
     // --- 1. ФУНКЦИЯ СОЗДАНИЯ ОКНА (IFRAME) ---
     function createFrame(url, title) {
-        const section = document.createElement("div");
-        section.className = "frame-section";
-        section.style.gridColumn = "span 8";
-        section.style.gridRow = "span 6";
+    const section = document.createElement("div");
+    section.className = "frame-section";
 
-        section.innerHTML = `
-            <div class="controls-wrapper">
-                <div class="label">${title}</div>
-                <button class="open-btn" onclick="editUrl(this)">✎</button>
-                <button class="open-btn btn-resize" onclick="resizeWidth(this)">↔</button>
-                <button class="open-btn btn-resize" onclick="resizeHeight(this)">↕</button>
-                <button class="open-btn btn-delete" onclick="this.closest('.frame-section').remove()">✕</button>
-            </div>
-            <iframe src="${url}" loading="lazy"></iframe>
-        `;
-        viewport.appendChild(section);
-    }
+    // Массивы возможных размеров (из тех, что вы используете в функциях resize)
+    const widths = [4, 6, 8, 12];
+    const heights = [2, 3, 4, 6];
+
+    // Выбираем случайный индекс
+    const randomWidth = widths[Math.floor(Math.random() * widths.length)];
+    const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+
+    // Применяем случайные размеры
+    section.style.gridColumn = `span ${randomWidth}`;
+    section.style.gridRow = `span ${randomHeight}`;
+
+    section.innerHTML = `
+        <div class="controls-wrapper">
+            <div class="label">${title}</div>
+            <button class="open-btn" onclick="editUrl(this)">✎</button>
+            <button class="open-btn btn-resize" onclick="resizeWidth(this)">↔</button>
+            <button class="open-btn btn-resize" onclick="resizeHeight(this)">↕</button>
+            <button class="open-btn btn-delete" onclick="this.closest('.frame-section').remove()">✕</button>
+        </div>
+        <iframe src="${url}" loading="lazy"></iframe>
+    `;
+    viewport.appendChild(section);
+}
+
+
 
     // --- 2. НАСТРОЙКА ПУНКТОВ МЕНЮ И КНОПОК КОПИРОВАНИЯ ---
     document.querySelectorAll(".nav-item").forEach(item => {
