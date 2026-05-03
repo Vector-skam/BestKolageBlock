@@ -211,114 +211,124 @@
     <div class="viewport-container" id="viewport"></div>
     
     <script>
-        const viewport = document.getElementById("viewport");
-        const addBtn = document.getElementById("addBlankFrame");
+    const viewport = document.getElementById("viewport");
+    const addBtn = document.getElementById("addBlankFrame");
 
-        function createFrame(url, title) {
-            const section = document.createElement("div");
-            section.className = "frame-section";
-            
-            // Начальный размер: 6 колонок (половина ширины при 12-колоночной сетке)
-            section.style.gridColumn = "span 8";
-            section.style.gridRow = "span 6";
+    // --- 1. ФУНКЦИЯ СОЗДАНИЯ ОКНА (IFRAME) ---
+    function createFrame(url, title) {
+        const section = document.createElement("div");
+        section.className = "frame-section";
+        section.style.gridColumn = "span 8";
+        section.style.gridRow = "span 6";
 
-            section.innerHTML = `
-                <div class="controls-wrapper">
-                    <div class="label">${title}</div>
-                    <button class="open-btn" onclick="editUrl(this)">✎</button>
-                    <button class="open-btn btn-resize" onclick="resizeWidth(this)">↔</button>
-                    <button class="open-btn btn-resize" onclick="resizeHeight(this)">↕</button>
-                    <button class="open-btn btn-delete" onclick="this.closest('.frame-section').remove()">✕</button>
-                </div>
-                <iframe src="${url}" loading="lazy"></iframe>
-            `;
-            viewport.appendChild(section);
-        }
-
-        function resizeWidth(btn) {
-            const section = btn.closest('.frame-section');
-            const currentSpan = parseInt(section.style.gridColumn.split(' ')[1]);
-            const sizes = [3, 4, 6, 8, 12];
-            let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
-            section.style.gridColumn = `span ${sizes[nextIndex]}`;
-        }
-
-        function resizeHeight(btn) {
-            const section = btn.closest('.frame-section');
-            const currentSpan = parseInt(section.style.gridRow.split(' ')[1]);
-            const sizes = [1, 2, 3, 4, 6];
-            let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
-            section.style.gridRow = `span ${sizes[nextIndex]}`;
-        }
-
-        function editUrl(btn) {
-            const section = btn.closest('.frame-section');
-            const iframe = section.querySelector('iframe');
-            const label = section.querySelector('.label');
-            alert("Внимание: В целях безопасности в Германии разрешены только https:// соединения.");
-            const newUrl = prompt("Введите URL:", iframe.src);
-            if (!confirm("При загрузке этого сайта ваш IP-адрес будет передан стороннему серверу. Продолжить?")) {
-    window.location.href = "https://web3my.vercel.app/";
-        }
-            if (newUrl) {
-                const formatted = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
-                iframe.src = formatted;
-                label.textContent = "Custom";
-            }
-        }
-
-        addBtn.onclick = () => createFrame("https://web3my.vercel.app", "Empty");
-
-        document.querySelectorAll(".nav-item").forEach(item => {
-            const hue = Math.floor(Math.random() * 360);
-            if(!item.style.color) item.style.borderLeft = `3px solid hsl(${hue}, 70%, 50%)`;
-            
-            item.onclick = function() {
-                createFrame(this.getAttribute("data-url"), this.textContent);
-                viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
-            };
-        });
-
-        // Начальные окна
-        createFrame("https://multichat3dcube.netlify.app/","3DCubeChat");
-        createFrame("https://natokinaseninja3d.netlify.app/","NatokinaseNinja3D");
-        createFrame("https://web3my.vercel.app/", "Web3My");
-        createFrame("https://web3universe.netlify.app/", "WWWWEBS");
-
-
-
-
-
-
-
-        //////
-        const navList = document.getElementById('navList');
-
-// 1. Создаем кнопки внутри каждого элемента
-document.querySelectorAll('.nav-item').forEach(item => {
-    const copyBtn = document.createElement('button');
-    copyBtn.innerText = '📋'; // Иконка копирования
-    copyBtn.className = 'copy-btn';
-    item.appendChild(copyBtn);
-});
-
-// 2. Логика копирования
-navList.addEventListener('click', (e) => {
-    if (e.target.classList.contains('copy-btn')) {
-        e.stopPropagation(); // Чтобы не срабатывал переход по ссылке самого пункта
-        
-        const parent = e.target.closest('.nav-item');
-        const url = parent.getAttribute('data-url');
-
-        navigator.clipboard.writeText(url).then(() => {
-            const originalIcon = e.target.innerText;
-            e.target.innerText = '✅'; // Показываем, что скопировано
-            setTimeout(() => e.target.innerText = originalIcon, 1000);
-        });
+        section.innerHTML = `
+            <div class="controls-wrapper">
+                <div class="label">${title}</div>
+                <button class="open-btn" onclick="editUrl(this)">✎</button>
+                <button class="open-btn btn-resize" onclick="resizeWidth(this)">↔</button>
+                <button class="open-btn btn-resize" onclick="resizeHeight(this)">↕</button>
+                <button class="open-btn btn-delete" onclick="this.closest('.frame-section').remove()">✕</button>
+            </div>
+            <iframe src="${url}" loading="lazy"></iframe>
+        `;
+        viewport.appendChild(section);
     }
-});
+
+    // --- 2. НАСТРОЙКА ПУНКТОВ МЕНЮ И КНОПОК КОПИРОВАНИЯ ---
+    document.querySelectorAll(".nav-item").forEach(item => {
+        // Стилизуем родительский элемент для позиционирования
+        item.style.position = 'relative';
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.paddingRight = '30px'; // Место под кнопку, чтобы текст не сливался
+
+        // Рандомный цвет полоски
+        const hue = Math.floor(Math.random() * 360);
+        if(!item.style.color) item.style.borderLeft = `3px solid hsl(${hue}, 70%, 50%)`;
+
+        // Оборачиваем текст
+        const textContent = item.textContent;
+        item.innerHTML = `<span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${textContent}</span>`;
+
+        // Создаем кнопку копирования поверх всего
+        const copyBtn = document.createElement('button');
+        copyBtn.innerHTML = '📋';
+        copyBtn.title = 'Копировать';
+        copyBtn.style.cssText = `
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: white; /* Фон, чтобы текст под кнопкой не просвечивал */
+            border: 1px solid #eee;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 2px 4px;
+            box-shadow: -2px 0 5px white; /* Мягкое скрытие текста слева от кнопки */
+        `;
         
-    </script>
+        item.appendChild(copyBtn);
+
+        // Логика копирования
+        copyBtn.onclick = (e) => {
+            e.stopPropagation(); 
+            const url = item.getAttribute("data-url");
+            navigator.clipboard.writeText(url).then(() => {
+                const originalIcon = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅';
+                setTimeout(() => { copyBtn.innerHTML = originalIcon; }, 1000);
+            });
+        };
+
+        // Логика клика по пункту
+        item.onclick = function(e) {
+            if (e.target !== copyBtn) {
+                createFrame(this.getAttribute("data-url"), textContent);
+                viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+            }
+        };
+    });
+
+    // --- 3. ФУНКЦИИ УПРАВЛЕНИЯ ---
+    function resizeWidth(btn) {
+        const section = btn.closest('.frame-section');
+        const currentSpan = parseInt(section.style.gridColumn.split(' ')[1]);
+        const sizes = [3, 4, 6, 8, 12];
+        let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
+        section.style.gridColumn = `span ${sizes[nextIndex]}`;
+    }
+
+    function resizeHeight(btn) {
+        const section = btn.closest('.frame-section');
+        const currentSpan = parseInt(section.style.gridRow.split(' ')[1]);
+        const sizes = [1, 2, 3, 4, 6];
+        let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
+        section.style.gridRow = `span ${sizes[nextIndex]}`;
+    }
+
+    function editUrl(btn) {
+        const section = btn.closest('.frame-section');
+        const iframe = section.querySelector('iframe');
+        const label = section.querySelector('.label');
+        const newUrl = prompt("Введите URL:", iframe.src);
+        if (newUrl) {
+            const formatted = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
+            iframe.src = formatted;
+            label.textContent = "Custom";
+        }
+    }
+
+    addBtn.onclick = () => createFrame("https://web3my.vercel.app", "Empty");
+
+    createFrame("https://multichat3dcube.netlify.app/","3DCubeChat");
+    createFrame("https://natokinaseninja3d.netlify.app/","NatokinaseNinja3D");
+    createFrame("https://web3my.vercel.app/", "Web3My");
+    createFrame("https://web3universe.netlify.app/", "WWWWEBS");
+</script>
+
+
     <script src="https://dmamax.netlify.app/legal-module.js"></script>
 </body>
                 </html>
