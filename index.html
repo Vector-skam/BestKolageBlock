@@ -257,7 +257,9 @@
             const label = section.querySelector('.label');
             alert("Внимание: В целях безопасности в Германии разрешены только https:// соединения.");
             const newUrl = prompt("Введите URL:", iframe.src);
-            
+            if (!confirm("При загрузке этого сайта ваш IP-адрес будет передан стороннему серверу. Продолжить?")) {
+    window.location.href = "https://web3my.vercel.app/";
+        }
             if (newUrl) {
                 const formatted = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
                 iframe.src = formatted;
