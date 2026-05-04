@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web3my - Dashboard</title>
+
+    <style>
+        :root {
+            /* Базовые переменные сохранены, но используются реже */
+            --turquoise: #40e0d0;
+            --text-on-dark: #eee;
+            --sidebar-width: 15%; /* Слегка увеличена ширина для пузырей */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #010409; /* Темный фон всего окна */
+            color: var(--text-on-dark);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            user-select: none; 
+        }
+
+        /* --- ОБНОВЛЕННЫЙ ТЕМНЫЙ СТИЛЬ САЙДБАРА --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: 160px; /* Увеличена минимальная ширина */
+            max-width: 70vw;
+            /* Фон: темный градиент с наложением пузырей и боке */
+            background-color: #010409;
+            background-image: 
+                radial-gradient(circle at 70% 30%, rgba(64, 224, 208, 0.3), transparent 40%),
+                radial-gradient(circle at 30% 70%, rgba(255, 0, 128, 0.2), transparent 40%),
+                linear-gradient(135deg, rgba(13, 17, 23, 0.8), rgba(0, 0, 0, 0.95)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><circle cx="200" cy="150" r="100" fill="rgba(64, 224, 208, 0.5)" filter="blur(30px)"/><circle cx="50" cy="400" r="130" fill="rgba(255, 0, 128, 0.4)" filter="blur(35px)"/><circle cx="230" cy="450" r="70" fill="rgba(255, 180, 0, 0.4)" filter="blur(25px)"/><circle cx="100" cy="100" r="150" fill="rgba(110, 20, 250, 0.4)" filter="blur(35px)"/></svg>');
+            background-size: cover;
+            background-blend-mode: color-dodge, color-dodge, normal, normal;
+            border-right: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            z-index: 100;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative; /* Для наложения боке */
+        }
+
+        /* Псевдоэлемент для боке и пузырей поверх фона */
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600" opacity="0.3"><circle cx="150" cy="200" r="8" fill="rgba(255,255,255,0.7)"/><circle cx="250" cy="350" r="5" fill="rgba(255,255,255,0.5)"/><circle cx="80" cy="480" r="6" fill="rgba(255,255,255,0.6)"/><circle cx="210" cy="50" r="7" fill="rgba(255,255,255,0.8)"/><ellipse cx="280" cy="180" rx="3" ry="5" fill="rgba(255,255,255,0.4)"/></svg>');
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --- ТЕМНЫЙ РЕСАЙЗЕР --- */
+        .resizer {
+            width: 4px;
+            cursor: col-resize;
+            background: #30363d;
+            transition: background 0.2s;
+            z-index: 101;
+            position: relative;
+            touch-action: none;
+        }
+
+        .resizer::after {
+            content: "";
+            position: absolute;
+            top: 0; bottom: 0; left: -10px; right: -10px;
+        }
+
+        .resizer:hover, .resizer.dragging {
+            background: var(--turquoise);
+        }
+
+        /* --- ТЕМНЫЕ ЭЛЕМЕНТЫ УПРАВЛЕНИЯ САЙДБАРА --- */
+        .sidebar h2 { 
+            color: #eee; /* Белый текст */
+            font-size: 11px; 
+            margin-bottom: 15px; 
+            text-align: center; 
+            border-bottom: 2px solid var(--turquoise);
+            padding-bottom: 8px;
+            z-index: 2; /* Поверх боке */
+            position: relative;
+        }
+
+        .grid-controls {
+            background: rgba(255, 255, 255, 0.05); /* Полупрозрачный темный */
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 2;
+            position: relative;
+        }
+
+        .grid-controls label { font-size: 8px; font-weight: bold; color: #aaa; text-transform: uppercase; }
+
+        .ctrl-btn {
+            width: 100%;
+            background: var(--turquoise);
+            color: #000;
+            border: none;
+            padding: 6px 3px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 9px;
+            transition: 0.2s;
+        }
+        .ctrl-btn:hover { filter: brightness(0.9); }
+
+        .nav-list { display: flex; flex-direction: column; gap: 4px; z-index: 2; position: relative; }
+        
+        /* --- СВЕТЛЫЕ НАВИГАЦИОННЫЕ ЭЛЕМЕНТЫ НА ТЕМНОМ ФОНЕ --- */
+        .nav-item {
+            position: relative;
+            padding: 6px 45px 6px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.03); /* Полупрозрачный фон */
+            color: #eee; /* Светлый текст */
+            display: flex;
+            align-items: center;
+            transition: 0.15s;
+            min-height: 32px;
+            backdrop-filter: blur(2px); /* Размытие пузырей под ссылкой */
+        }
+        
+        .nav-item:hover { transform: translateX(3px); background: rgba(255, 255, 255, 0.1); }
+        .nav-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .item-action-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1); /* Темный фон кнопки */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 3px 6px;
+            z-index: 10;
+        }
+        .btn-ext { right: 28px; }
+        .btn-copy { right: 4px; }
+
+        /* --- ТЕМНЫЙ VIEWPORT И ОКНА --- */
+        .viewport-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr); 
+            grid-auto-rows: minmax(120px, auto);
+            overflow-y: auto;
+            background: #010409; /* Очень темный фон, как на скрине */
+            gap: 8px;
+            padding: 8px;
+            align-content: start;
+        }
+
+        .viewport-container.resizing iframe { pointer-events: none; }
+
+        .frame-section {
+            position: relative;
+            background: #161b22; /* Темный фон окна */
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #30363d;
+        }
+
+        .controls-wrapper {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            z-index: 50;
+            opacity: 0.1;
+            transition: opacity 0.3s;
+        }
+        .frame-section:hover .controls-wrapper { opacity: 1; }
+
+        .label { 
+            background: rgba(0,0,0,0.8); 
+            color: white; 
+            padding: 3px 8px; 
+            font-size: 10px; 
+            border-radius: 4px;
+        }
+
+        .open-btn { 
+            background: #21262d; 
+            color: white;
+            border: 1px solid #30363d; 
+            padding: 3px 6px; 
+            font-size: 11px; 
+            cursor: pointer; 
+            border-radius: 4px;
+        }
+        .btn-resize { background: #3d3b2e; border-color: #fab005; }
+        .btn-delete { background: #3a1c1c; border-color: #ff8787; color: #fa5252; }
+
+        iframe { width: 100%; flex: 1; border: none; background: white; }
+
+        .sidebar-footer { margin-top: auto; padding: 10px 5px; font-size: 9px; text-align: center; color: #555; border-top: 1px solid #30363d; z-index: 2; position: relative; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <h2>WEB3 - DASHBOARD</h2>
+        <div class="grid-controls">
+            <label>Меню:</label>
+            <button id="addBlankFrame" class="ctrl-btn" style="background: #2c3e50; color: white;">+ ОКНО</button>
+            <button onclick="location.reload()" class="ctrl-btn" style="background: #444; color: white;">СБРОС</button>
+        </div>
+
+        <div class="nav-list" id="navList">
+            <div class="nav-item" data-url="https://web3my.vercel.app/">Web3My</div>
+            <div class="nav-item" data-url="https://www.google.com/search?q=threejs&igu=1">Google Search</div>
+            <div class="nav-item" data-url="https://wwwwebs.netlify.app/">WWWWEBS</div>
+            <div class="nav-item" data-url="https://drawingtogether.netlify.app/">DrawingTogether</div>
+            <div class="nav-item" data-url="https://sprintwood.netlify.app/">SprintWood</div>
+            <div class="nav-item" data-url="https://sandbox3dtogether.netlify.app/">SandBox3DTogether</div>
+            <div class="nav-item" data-url="https://web3universe.netlify.app/">WEB3UNIVERSE</div>
+            <div class="nav-item" data-url="https://reinhref.netlify.app/">/Rein Href</div>
+            <div class="nav-item" data-url="https://readflowblock.netlify.app/">ReadFlowBlock</div>
+            <div class="nav-item" data-url="https://multichat3dcube.netlify.app/">MultiChat3DCube</div>
+            <div class="nav-item" data-url="https://drawingtogether3d.netlify.app/">DrawingTogether3D</div>
+            <div class="nav-item" data-url="https://vectorgeometry.netlify.app/">VectorGeometry</div>
+            <div class="nav-item" data-url="https://web3video.netlify.app">Video Full</div>
+            <div class="nav-item" data-url="https://web3audio.netlify.app">Audio Fun</div>
+            <div class="nav-item" data-url="https://relaxstar.netlify.app">Relax Star</div>
+            <div class="nav-item" data-url="https://ball-bell.netlify.app/">Game: Ball-Bell</div>
+            <div class="nav-item" data-url="https://glasssmall.netlify.app/">Game: GlassSmall</div>
+            <div class="nav-item" data-url="https://pianorain.netlify.app/">Game: PianoRain</div>
+            <div class="nav-item" data-url="https://geometryninja.netlify.app/">Game: GeometryNinja</div>
+            <div class="nav-item" data-url="https://bouncearea.netlify.app/">Game: BounceArea</div>
+            <div class="nav-item" data-url="https://stakebounce.netlify.app/">Game: StakeBounce</div>
+            <div class="nav-item" data-url="https://pianosteps.netlify.app/">Game: PianoSteps</div>
+            <div class="nav-item" data-url="https://physicaldrawing.netlify.app/">Game: PhysicalDrawing</div>
+            <div class="nav-item" data-url="https://starstaps.netlify.app/">Game: StarsTaps</div>
+            <div class="nav-item" data-url="https://rengerarena.netlify.app/">Game: RengerArena</div>
+            <div class="nav-item" data-url="https://jumpbounce.netlify.app/">Game: JumpBounce</div>
+            <div class="nav-item" data-url="https://triangle-tree.netlify.app/">Game: Triangle Tree</div>
+            <div class="nav-item" data-url="https://agka.netlify.app/">Game: AGKA</div>
+            <div class="nav-item" data-url="https://natokinaseninja3d.netlify.app/">Game: NATOKINASENINJA3D</div>
+            <div class="nav-item" data-url="https://starframes.netlify.app/">StarFrames</div>
+            <div class="nav-item" data-url="https://wavescreen.netlify.app/">WaveScreen</div>
+            <div class="nav-item" data-url="https://constellationsplanetearth.netlify.app/" style="color: #4facfe !important;">constell.</div>
+            <div class="nav-item" data-url="https://mathlabcontrol.netlify.app/" style="color: #4facfe !important;">MathLab</div>
+            <div class="nav-item" data-url="https://symbolpart.netlify.app/">SymbolPart</div>
+            <div class="nav-item" data-url="https://web3cp.netlify.app/" style="color: #00FF41 !important;">Donate</div>
+            <div class="nav-item" data-url="https://muvecollagefoto.vercel.app/">MuveCollageFoto</div>
+            <div class="nav-item" data-url="https://aiimageformatreizer.vercel.app/" style="color: #4facfe !important;">AIImage</div>
+        </div>
+        
+        <div class="sidebar-footer">MAKSYM DIDUKH © 2026</div>
+    </nav>
+
+    <div class="resizer" id="resizer"></div>
+    
+    <div class="viewport-container" id="viewport"></div>
+    
+    <script>
+    const viewport = document.getElementById("viewport");
+    const sidebar = document.getElementById("sidebar");
+    const resizer = document.getElementById("resizer");
+    const addBtn = document.getElementById("addBlankFrame");
+
+    // --- УНИВЕРСАЛЬНАЯ ЛОГИКА РЕЗАЙЗА (MOUSE + TOUCH) ---
+    let isResizing = false;
+
+    const startResizing = (e) => {
+        isResizing = true;
+        resizer.classList.add('dragging');
+        viewport.classList.add('resizing');
+        document.body.style.cursor = 'col-resize';
+    };
+
+    const stopResizing = () => {
+        isResizing = false;
+        resizer.classList.remove('dragging');
+        viewport.classList.remove('resizing');
+        document.body.style.cursor = 'default';
+    };
+
+    const handleMove = (clientX) => {
+        if (!isResizing) return;
+        // Ограничения для мобильных и ПК
+        const minWidth = 120; // Увеличена минимальная ширина
+        const maxWidth = window.innerWidth * 0.7;
+        if (clientX > minWidth && clientX < maxWidth) {
+            sidebar.style.width = clientX + 'px';
+        }
+    };
+
+    // Мышь
+    resizer.addEventListener('mousedown', startResizing);
+    document.addEventListener('mousemove', (e) => handleMove(e.clientX));
+    document.addEventListener('mouseup', stopResizing);
+
+    // Тач (телефон)
+    resizer.addEventListener('touchstart', startResizing, { passive: true });
+    document.addEventListener('touchmove', (e) => {
+        if (isResizing && e.touches[0]) {
+            handleMove(e.touches[0].clientX);
+        }
+    }, { passive: false });
+    document.addEventListener('touchend', stopResizing);
+
+
+    // --- ФУНКЦИИ ИНТЕРФЕЙСА ---
+    function createFrame(url, title) {
+        const section = document.createElement("div");
+        section.className = "frame-section";
+
+        const widths = [4, 6, 8, 12];
+        const heights = [2, 3, 4];
+        const randomWidth = widths[Math.floor(Math.random() * widths.length)];
+        const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+
+        section.style.gridColumn = `span ${randomWidth}`;
+        section.style.gridRow = `span ${randomHeight}`;
+
+        section.innerHTML = `
+            <div class="controls-wrapper">
+                <div class="label">${title}</div>
+                <button class="open-btn" onclick="editUrl(this)">✎</button>
+                <button class="open-btn btn-resize" onclick="resizeWidth(this)">↔</button>
+                <button class="open-btn btn-resize" onclick="resizeHeight(this)">↕</button>
+                <button class="open-btn btn-delete" onclick="this.closest('.frame-section').remove()">✕</button>
+            </div>
+            <iframe src="${url}" loading="lazy"></iframe>
+        `;
+        viewport.appendChild(section);
+    }
+
+    document.querySelectorAll(".nav-item").forEach(item => {
+        const url = item.getAttribute("data-url");
+        const title = item.textContent;
+        // Яркие цвета для обводки на темном фоне
+        const hue = Math.floor(Math.random() * 360);
+        if(!item.style.color) item.style.borderLeft = `3px solid hsl(${hue}, 80%, 60%)`;
+
+        item.innerHTML = `<span>${title}</span>`;
+
+        const extBtn = document.createElement('button');
+        extBtn.innerHTML = '↗';
+        extBtn.className = 'item-action-btn btn-ext';
+        extBtn.onclick = (e) => { e.stopPropagation(); window.open(url, '_blank'); };
+
+        const copyBtn = document.createElement('button');
+        copyBtn.innerHTML = '📋';
+        copyBtn.className = 'item-action-btn btn-copy';
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(url).then(() => {
+                const old = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅';
+                setTimeout(() => copyBtn.innerHTML = old, 1000);
+            });
+        };
+
+        item.appendChild(extBtn);
+        item.appendChild(copyBtn);
+
+        item.onclick = (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                createFrame(url, title);
+                viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+            }
+        };
+    });
+
+    function resizeWidth(btn) {
+        const section = btn.closest('.frame-section');
+        const currentSpan = section.style.gridColumn ? parseInt(section.style.gridColumn.split(' ')[1]) : 6;
+        const sizes = [3, 4, 6, 8, 12];
+        let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
+        section.style.gridColumn = `span ${sizes[nextIndex]}`;
+    }
+
+    function resizeHeight(btn) {
+        const section = btn.closest('.frame-section');
+        const currentSpan = section.style.gridRow ? parseInt(section.style.gridRow.split(' ')[1]) : 2;
+        const sizes = [1, 2, 3, 4, 6];
+        let nextIndex = (sizes.indexOf(currentSpan) + 1) % sizes.length;
+        section.style.gridRow = `span ${sizes[nextIndex]}`;
+    }
+
+    function editUrl(btn) {
+        const section = btn.closest('.frame-section');
+        const iframe = section.querySelector('iframe');
+        const label = section.querySelector('.label');
+        const newUrl = prompt("Введите URL:", iframe.src);
+        if (newUrl) {
+            const formatted = newUrl.startsWith('http') ? newUrl : 'https://' + newUrl;
+            iframe.src = formatted;
+            label.textContent = "Custom";
+        }
+    }
+
+    addBtn.onclick = () => createFrame("https://web3my.vercel.app", "Empty");
+
+    window.onload = () => {
+        createFrame("https://multichat3dcube.netlify.app/","3DCubeChat");
+        createFrame("https://natokinaseninja3d.netlify.app/","NatokinaseNinja3D");
+        createFrame("https://web3my.vercel.app/", "Web3My");
+    };
+    </script>
+<script src="https://dmamax.netlify.app/legal-module.js"></script>
+
+</body>
+              </html>
+              
